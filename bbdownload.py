@@ -7,16 +7,28 @@ import sys
 import json
 import re
 
-BB_COURSE_URL = 'https://blackboard.ru.nl/webapps/blackboard/execute/' \
-                'modulepage/view?course_id=_{course_id}_1&cmp_tab_id=_225350_1'
-BB_LOGIN_URL = 'https://blackboard.ru.nl/webapps/login/'
-BB_ASSIGNMENTS_URL = 'https://blackboard.ru.nl/webapps/gradebook/do/' \
-                     'instructor/downloadGradebook?dispatch=viewDownload' \
-                     'Options&course_id=_{course_id}_1'
-BB_DOWNLOAD_URL = 'https://blackboard.ru.nl/webapps/gradebook/do/instructor/' \
-                  'downloadAssignment'
-BB_PREDOWNLOAD_URL = BB_DOWNLOAD_URL + '?outcome_definition_id={ass_id}&' \
-                     'showAll=true&course_id=_{course_id}_1&startIndex=0'
+BB_BASE = 'https://blackboard.ru.nl{}'
+
+BB_COURSE_URL = BB_BASE.format(
+    '/webapps/blackboard/execute/modulepage/view?course_id=_{course_id}_1&'
+    'cmp_tab_id=_225350_1'
+)
+
+BB_LOGIN_URL = BB_BASE.format('/webapps/login/')
+
+BB_ASSIGNMENTS_URL = BB_BASE.format(
+    '/webapps/gradebook/do/instructor/downloadGradebook?dispatch=viewDownload'
+    'Options&course_id=_{course_id}_1'
+)
+
+BB_DOWNLOAD_URL = BB_BASE.format(
+    '/webapps/gradebook/do/instructor/downloadAssignment'
+)
+
+BB_PREDOWNLOAD_URL = (
+    BB_DOWNLOAD_URL + '?outcome_definition_id={ass_id}&showAll=true&'
+    'course_id=_{course_id}_1&startIndex=0'
+)
 
 
 # Blame Blackboard
@@ -163,7 +175,7 @@ with requests.Session() as s:
         with open('config.json', 'w') as config_file:
             json.dump(config, config_file, sort_keys=True, indent=4)
 
-    assignments = get_assignments(s, course)
+    assignment_choices = get_assignments(s, course)
     print 'Which assignment would you like to download?'
-    ass_id, ass_name = get_choice(assignments)
+    ass_id, ass_name = get_choice(assignment_choices)
     download_assignment(s, course, ass_id, ass_name)
